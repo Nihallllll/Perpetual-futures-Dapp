@@ -50,14 +50,14 @@ contract Perps {
    }
 
 
-   function getPnL(uint latestPrice) external view returns(uint amount){
-      Position storage userPosition = userPositions[msg.sender];
-      if (userPosition.isLong){
-      amount = latestPrice - userPosition.entryPrice * userPosition.quantity;
-      }else{
-      amount = userPosition.entryPrice - latestPrice * userPosition.quantity;
-      }
-      return amount ; 
+   function getPnL(uint latestPrice) external view returns(int amount){
+       Position storage userPosition = userPositions[msg.sender];
+
+    if (userPosition.isLong) {
+        amount = int(latestPrice - userPosition.entryPrice) * int(userPosition.quantity) / 1e18;
+    } else {
+        amount = int(userPosition.entryPrice - latestPrice) * int(userPosition.quantity) / 1e18;
+    }
    }
 
    function addMargin(uint amount ,uint latestPrice) external {
@@ -116,12 +116,34 @@ contract Perps {
       rewardOrloss = userPosition.margin  + uint(pnl) ;
       usdcToken.mint(msg.sender, uint(pnl));
    }else{
-      rewardOrloss = userPosition.margin - uint(pnl);
+      rewardOrloss = userPosition.margin - uint(-pnl);
       lossedMoney += rewardOrloss ;       
    }
 
     delete userPositions[msg.sender]; // Close position
     
 }
+
+  function getUserPosition(address user) public view returns (
+    uint entryPrice,
+    uint leverage,
+    uint timestamp,
+    uint margin,
+    uint size,
+    bool isLong,
+    uint quantity
+) {
+    Position storage pos = userPositions[user];
+    return (
+        pos.entryPrice,
+        pos.leverage,
+        pos.timestamp,
+        pos.margin,
+        pos.size,
+        pos.isLong,
+        pos.quantity
+    );
+}
+
 
 }
