@@ -1,4 +1,2 @@
-import { Buffer } from 'buffer';
-globalThis.Buffer = Buffer;
-import process from 'process';
-globalThis.process = process;
+import { Buffer } from "buffer";
+window.Buffer = Buffer;
