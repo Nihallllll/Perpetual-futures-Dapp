@@ -5,7 +5,7 @@ export function Appbar() {
 
   return <div className='flex justify-between p-2 m-2'>
     <div className='text-2xl'>
-        Stakify
+        Wallet Connect
     </div>
     <div>
         {!address ? <Connectors /> : <Disconnect />}

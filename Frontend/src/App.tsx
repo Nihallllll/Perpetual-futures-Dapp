@@ -3,6 +3,7 @@ import { WagmiProvider } from 'wagmi'
 import { config } from './config'
 import TradingChart from './components/tradingChart'
 import { OpenPosition } from './components/perpLogig'
+import { Appbar } from './components/walletConnect'
 
 const queryClient = new QueryClient()
  
@@ -11,6 +12,7 @@ export default function App() {
      <WagmiProvider config={config}>
        <QueryClientProvider client={queryClient}> 
        <TradingChart/>
+       <Appbar/>
        <OpenPosition/>
        </QueryClientProvider> 
      </WagmiProvider>

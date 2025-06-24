@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useWriteContract, useReadContract } from "wagmi";
 import { Perpabi } from "../abi";
-
+import { useAccount } from 'wagmi'
 type Position = {
   entryPrice: bigint;
   margin: bigint;
@@ -69,14 +69,28 @@ export function OpenPosition() {
 }
 
 function ShowUserPosition() {
+  const {address} = useAccount();
   const { data } = useReadContract({
     address: "0x2CC3cd0ebA37db68c909b90972E1E500BC82Cdf4",
     abi: Perpabi,
     functionName: "getUserPosition",
-    args: ["0x2966473D85A76A190697B5b9b66b769436EFE8e5"],
-  }) as { data: Position | undefined };
+    args: address ? [address] : [],
+    
+  });
 
-  const position = data;
+  let position: Position | null = null;
+
+  if (Array.isArray(data) && data.length === 7) {
+    position = {
+      entryPrice: BigInt(data[0]),
+      margin: BigInt(data[1]),
+      leverage: Number(data[2]),
+      timestamp: BigInt(data[3]),
+      size: BigInt(data[4]),
+      isLong: Boolean(data[5]),
+      quantity: BigInt(data[6]),
+    };
+  }
 
   return (
     <div>
