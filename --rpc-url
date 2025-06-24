@@ -1,0 +1,13 @@
+Compiling 16 files with Solc 0.8.28
+Solc 0.8.28 finished in 1.86s
+Compiler run successful with warnings:
+Warning (2072): Unused local variable.
+  --> script/Counter.s.sol:12:9:
+   |
+12 |         Perps perps = new Perps(); // add constructor args if any
+   |         ^^^^^^^^^^^
+
+Script ran successfully.
+Gas used: 1083489
+
+If you wish to simulate on-chain transactions pass a RPC URL.

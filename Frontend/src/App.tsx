@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { config } from './config'
 import TradingChart from './components/tradingChart'
+import { Dashboard } from './components/perpLogig'
 
 const queryClient = new QueryClient()
  
@@ -10,6 +11,7 @@ export default function App() {
      <WagmiProvider config={config}>
        <QueryClientProvider client={queryClient}> 
        <TradingChart/>
+       <Dashboard/>
        </QueryClientProvider> 
      </WagmiProvider>
    )
