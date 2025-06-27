@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { WagmiProvider } from 'wagmi'
 import { config } from './config'
 import TradingChart from './components/tradingChart'
-import { OpenPosition } from './components/perpLogig'
+import { ClosePosition, GetPnl, OpenPosition, ShowUserPosition } from './components/perpLogig'
 import { Appbar } from './components/walletConnect'
 
 const queryClient = new QueryClient()
@@ -14,6 +14,9 @@ export default function App() {
        <TradingChart/>
        <Appbar/>
        <OpenPosition/>
+       <ClosePosition/>
+       <GetPnl/>
+       <ShowUserPosition/>
        </QueryClientProvider> 
      </WagmiProvider>
    )
