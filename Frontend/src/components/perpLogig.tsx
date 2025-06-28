@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useWriteContract, useReadContract } from "wagmi";
 import { Perpabi } from "../abi";
-import { useAccount } from 'wagmi'
+import { useAccount } from "wagmi";
+import { parseEther } from "viem";
 type Position = {
   entryPrice: bigint;
   margin: bigint;
@@ -15,12 +16,14 @@ type Position = {
 export function ClosePosition() {
   const { writeContract } = useWriteContract();
   const [latestPrice, setLatestPrice] = useState<number | null>(null);
- 
+
   // 🔁 Fetch latest price from Binance every 5 seconds
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+        const res = await fetch(
+          "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
+        );
         const data = await res.json();
         setLatestPrice(Number(data.price));
       } catch (err) {
@@ -36,9 +39,10 @@ export function ClosePosition() {
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center">
       <div className="mb-4 text-lg">
-        Latest Price: {latestPrice ? `$${latestPrice.toFixed(2)}` : "Loading..."}
+        Latest Price:{" "}
+        {latestPrice ? `$${latestPrice.toFixed(2)}` : "Loading..."}
       </div>
-     
+
       <button
         className="mx-2 border rounded p-2 text-2xl"
         disabled={!latestPrice}
@@ -46,7 +50,7 @@ export function ClosePosition() {
           if (!latestPrice) return;
 
           writeContract({
-            address: "0x4a622a5F317E292604D573135EF46af197B685F2",
+            address: "0xa50Fb02A6e1f4D9C3EcE2d225042Fb8c74Bc64d1",
             abi: Perpabi,
             functionName: "closePosition",
             args: [
@@ -57,8 +61,6 @@ export function ClosePosition() {
       >
         Close Position
       </button>
-
-    
     </div>
   );
 }
@@ -66,13 +68,15 @@ export function ClosePosition() {
 export function OpenPosition() {
   const { writeContract } = useWriteContract();
   const [latestPrice, setLatestPrice] = useState<number | null>(null);
-  const [margin ,setMargin]= useState(0);
-  const [leverage,setleverage] =useState(0);
+  const [margin, setMargin] = useState(0);
+  const [leverage, setleverage] = useState(0);
   // 🔁 Fetch latest price from Binance every 5 seconds
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+        const res = await fetch(
+          "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
+        );
         const data = await res.json();
         setLatestPrice(Number(data.price));
       } catch (err) {
@@ -88,47 +92,54 @@ export function OpenPosition() {
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center">
       <div className="mb-4 text-lg">
-        Latest Price: {latestPrice ? `$${latestPrice.toFixed(2)}` : "Loading..."}
+        Latest Price:{" "}
+        {latestPrice ? `$${latestPrice.toFixed(2)}` : "Loading..."}
       </div>
-      <input type="Number" placeholder="Margin" onChange={(e)=>setMargin(Number(e.target.value))}></input>
-      <input type="Number" placeholder="Leverage" onChange={(e)=>setleverage(Number(e.target.value))}></input>
+      <input
+        type="Number"
+        placeholder="Margin"
+        onChange={(e) => setMargin(Number(e.target.value))}
+      ></input>
+      <input
+        type="Number"
+        placeholder="Leverage"
+        onChange={(e) => setleverage(Number(e.target.value))}
+      ></input>
       <button
         className="mx-2 border rounded p-2 text-2xl"
         disabled={!latestPrice}
         onClick={() => {
           if (!latestPrice) return;
-
+           console.log(leverage , margin);
           writeContract({
-            address: "0x4a622a5F317E292604D573135EF46af197B685F2",
+            address: "0xa50Fb02A6e1f4D9C3EcE2d225042Fb8c74Bc64d1",
             abi: Perpabi,
             functionName: "openPosition",
             args: [
-              BigInt(margin), // 1000 USDC margin
-              leverage,                  // 5x leverage
-              true,               // isLong
+              leverage, // leverage (e.g., 5 for 5x)
+              true, // isLong (true for long, false for short)
               BigInt(latestPrice * 1e8), // price scaled for 8 decimals
             ],
+            
+            value: parseEther(margin.toString()),
           });
         }}
       >
         Open Position
       </button>
-
-    
     </div>
   );
 }
 
 export function ShowUserPosition() {
-  const {address} = useAccount();
-  const { data ,refetch } = useReadContract({
-    address: "0x4a622a5F317E292604D573135EF46af197B685F2",
+  const { address } = useAccount();
+  const { data, refetch } = useReadContract({
+    address: "0xa50Fb02A6e1f4D9C3EcE2d225042Fb8c74Bc64d1",
     abi: Perpabi,
     functionName: "getUserPosition",
-    args: address ? [address] : [length-1],
-   
+    args: address ? [address] : [length - 1],
   });
-   
+
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
@@ -143,7 +154,7 @@ export function ShowUserPosition() {
       entryPrice: BigInt(data[0]),
       margin: BigInt(data[3]),
       leverage: Number(data[1]),
-      timestamp: BigInt(data[2]), 
+      timestamp: BigInt(data[2]),
       size: BigInt(data[4]),
       isLong: Boolean(data[5]),
       quantity: BigInt(data[6]),
@@ -168,14 +179,13 @@ export function ShowUserPosition() {
   );
 }
 
-
 export function GetPnl() {
   const { address } = useAccount();
   const [latestPrice, setLatestPrice] = useState<number | null>(null);
   const [shouldFetch, setShouldFetch] = useState(false);
 
   const { data, refetch, isFetching } = useReadContract({
-    address: "0x4a622a5F317E292604D573135EF46af197B685F2",
+    address: "0xa50Fb02A6e1f4D9C3EcE2d225042Fb8c74Bc64d1",
     abi: Perpabi,
     functionName: "getPnL",
     args: latestPrice ? [BigInt(latestPrice * 1e8)] : undefined,
@@ -214,7 +224,8 @@ export function GetPnl() {
   return (
     <div className="h-screen w-screen flex flex-col items-center justify-center">
       <div className="mb-4 text-lg">
-        Latest Price: {latestPrice ? `$${latestPrice.toFixed(2)}` : "Loading..."}
+        Latest Price:{" "}
+        {latestPrice ? `$${latestPrice.toFixed(2)}` : "Loading..."}
       </div>
 
       <button

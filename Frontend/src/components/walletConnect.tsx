@@ -8,7 +8,8 @@ export function Appbar() {
         Wallet Connect
     </div>
     <div>
-        {!address ? <Connectors /> : <Disconnect />}
+         <Connectors />
+          <Disconnect />
     </div>
   </div>
 }
